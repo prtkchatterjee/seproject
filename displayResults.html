@@ -1,0 +1,140 @@
+<html>
+	<head>
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+ 		<link rel="stylesheet" href="bootstrap/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="bootstrap/css/animate.css">
+  		<link href="bootstrap/css/prettyPhoto.css" rel="stylesheet">
+  		<link href="bootstrap/css/style.css" rel="stylesheet" />
+  		<script type = "text/javascript" src = "bootstrap/jquery.min.js"></script>
+  		<script type = "text/javascript" src = "bootstrap/js/bootstrap.min.js"></script>
+  		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" />
+		<style>
+			#logoutButton
+			{
+				position:absolute;
+				height:25px;
+				width:25px;
+				top:3%;
+				right:3%;
+			}
+			#loading
+			{
+				position:absolute;
+				top:30%;
+				left:20%;
+				height:200px;
+				width:200px;
+			}
+			body
+			{
+				color:#428abc; /* Changing the font color */
+				font-size:14pt;
+			}
+			h1
+			{
+				margin-left:80px; /* Adding a margin to enhance formatting */
+			}
+			table,td
+			{
+				border-collapse:collapse; /*Collapsing cell borders to avoid double borders for each row and column */
+				padding:5px; /* Padding to enhance visual appeal */
+				padding-left:15px;
+				padding-right:15px;
+				border: 	#000dc5 solid 2.5pt; /* Specifying the border for the table and each cell */ 
+			}
+			span
+			{
+				border:1pt #428abc solid;
+				padding-left:10px;
+				padding-right:10px;
+				font-weight:bold;
+			}
+			#srnDiv
+			{
+				background-color:#428abc;
+				color:white;
+				font-size:16pt;
+				left:40%;
+			}
+			#courseCodeDiv
+			{
+				background-color:white;
+				color:#428abc;
+				font-size:11pt;
+				margin-right:10px;
+				font-weight:bold;
+			}
+		</style>
+	<body>
+		<img id = "logoutButton" src = "Images/Logout.png">
+		<div class="container" id="containerClass">
+			<br>
+			<div class="text-center btn col-md-2" id="srnDiv"></div>
+			<br>
+			<br>
+		</div>
+		<script>
+			logoutButton.onclick = function()
+			{
+				var inp = confirm('Are you sure you want to Logout?');
+				if(inp)
+					window.location.href = "index.html";
+			}
+			document.body.onload = fetchResults; //Function to be called once the page is loaded
+			function fetchResults()
+			{
+				xhr = new XMLHttpRequest(); //Creating an AJAX request
+				xhr.onreadystatechange = resultsFetched; //Function to be called on change of the state of the AJAX request
+				xhr.open("GET","http://seproject.azurewebsites.net/getResults.php?srn="+localStorage.getItem('userid'),true);
+				//Opening a connection to the API on the cloud. SRN of the logged in student is stored in LocalStorage and is sent as a parameter in the GET request
+				xhr.send();
+				document.getElementById('containerClass').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+			function resultsFetched()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200) //Once the complete response has been received (indicated by readyState = 4) and response is a success (indicated by status = 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerClass').style = "opacity:1";
+					var response = xhr.responseText.split(";"); //Response from the AJAX request is a number of JSON objects separated by ;
+					//Here, we split it on ; to ensure that the variable response is an array of JSON objects (in string data type).
+					//Each JSON object is of the following format - {"srn":"01FB14ECS161","course_code":"UE14CS402","grade":"S"}
+					for(var row = 0; row < response.length; row++) //Iterating through the array of JSON objects
+					{
+						var resultObject = JSON.parse(response[row]); //Converting the JSON object (in string data type) to JSON data type
+						var panel = document.createElement("div");
+						panel.className = "panel panel-primary";
+						var panelHeading = document.createElement("div");
+						panelHeading.className = "panel-heading";
+						var panelCourseCode = document.createElement("div");
+						panelCourseCode.className = "text-center btn col-md-1";
+						panelCourseCode.id = "courseCodeDiv";
+						panelCourseCode.innerHTML = resultObject.course_code;
+						panelHeading.appendChild(panelCourseCode);
+						panelHeading.innerHTML += resultObject.course_name;
+						var panelBody = document.createElement("div");
+						panelBody.className = "panel-body";
+						panelBody.innerHTML = "Faculty - "+resultObject.faculty_name;
+						var panelSpan = document.createElement("span");
+						panelSpan.innerHTML = resultObject.grade;
+						panelSpan.className = "pull-right";
+						panelBody.appendChild(panelSpan);
+						panel.appendChild(panelHeading);
+						panel.appendChild(panelBody);
+						document.getElementById('srnDiv').innerHTML = resultObject.srn;
+						document.getElementById('containerClass').appendChild(panel);
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "studentOptionSelector.html";
+				}
+			}
+		</script>
+	</body>
+</html>

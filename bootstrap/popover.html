@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <script src="jquery_224.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script>
+	$(document).ready(init);
+	percent = 40;
+	function init(){
+		$("button[title=popover]").popover();
+		$("button#mymodal").bind("click", activateModal);
+		$("div#mod").on('hide.bs.modal', function(){alert('Bye');});
+		setTimeout(increaseP, 2000);
+	}
+
+	function increaseP()
+	{
+		str = percent + "%";
+		cssobj = 
+		{
+			'width': str
+		};
+		
+		$("div#prg").css(cssobj);
+		$("span").html(str + "&nbsp;&nbsp;Complete");
+				if(percent == 100)
+			{
+				$("div#prg").attr('class', "progress-bar progress-bar-success");
+			}
+		
+		percent = percent+ 20;
+		
+		if(percent <= 100)
+		{
+			setTimeout(increaseP, 2000);
+		}
+	
+	}
+	function activateModal()
+	{
+		$("div#mod").modal();
+	} 
+</script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Pop Over</h2>
+  <button class="btn btn-success" title="popover" data-toggle="popover"  data-placement="right" data-content="Hey This popover came on the right, right? RIGHT!!!" >CLICK FOR POPOVER</button>
+<p>
+<div class="progress progress-striped active">
+	<div id="prg" class="progress-bar progress-bar-info" style="width:20%;">
+		<span>20% Complete</span>
+	</div>
+</div>
+
+<button id="mymodal" class="btn btn-danger">CLICK FOR DIALOG</button>
+<div id="mod" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+			<h4 class="modal-title">Important Notice</h4>
+			<button class="close" data-dismiss="modal">X</button>
+			</div>
+		
+			<div class="modal-body">
+			Some text here....
+			</div>
+			
+			<div class="modal-footer">
+			<button class="btn btn-default" data-dismiss="modal">CLOSE</button>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+</body>
+</html>

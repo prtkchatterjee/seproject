@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BS for..not what you are thinking</title>
+<link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap.min.css"/>
+<script type="text/javascript" src="jquery_224.js"></script>
+<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+$("document").ready(init);
+function init()
+{
+	$(document).off('.button.data-api');
+	$("a").bind("click", setClass);
+	
+	//Start AJAX calls to fetch the next 4 chunks
+	percent = 40;
+	setTimeout(getChunk,2000);
+}
+
+function getChunk()
+{
+	str = percent + "%";
+	cssobj = {
+			'width':str
+	};
+	
+	if(percent > 100)
+	{
+		return;
+	}
+	else
+	{
+		$("div#bar").css(cssobj);
+		$("span").html(str + "&nbsp;&nbsp;Complete");
+			
+		if(percent == 100)
+		{
+			$("div#bar").attr('class',"progress-bar progress-bar-success");
+		}
+		percent += 20;
+	
+		setTimeout(getChunk, 2000);
+	}
+}
+
+function setClass(event)
+{
+	$("li").attr("class", "");
+	event.target.parentNode.setAttribute("class", "active");
+}
+</script>
+</head>
+<body>
+<div class="container">
+		<div class="col-sm-4 well well" style="background-color:yellow">Hello
+		</div>
+		<div class="col-sm-4 well" style="background-color:aqua">There
+		</div>
+		<div class="col-sm-4 well" style="background-color:aqua">There
+	
+			<div>
+				<div class="col-md-6">
+					<form>
+						<div class="form-group"><input class="form-control" type="text"/></div>
+						<div class="form-group"><button class="btn btn-success"/>SUBMIT</button></div>
+					</form>
+				</div>
+				<div class="col-md-6">
+					<div class="alert alert-success">WOAH</div>
+				</div>
+			</div>
+		</div>
+		<ul class="nav nav-pills">
+			<li class="active"><a href="#">ONE</a></li>
+			<li><a href="#">TWO</a></li>
+			<li><a href="#">THREE</a></li>
+			<li><a href="#">FOUR</a></li>
+		</ul>
+		<table class="table table-bordered table-hover">
+			<tr><td>ONE</td><td>BOOO</td></tr>
+			<tr><td>TWO</td><td>BOOO</td></tr>
+			<tr><td>THREE</td><td>BOOO</td></tr>
+		</table>
+		
+		<div class="progress progress-striped active">
+			<div id="bar" class="progress-bar progress-bar-info" style="width:20%; color:green;font-size:20px"/><span>20% Complete</span></div>
+		</div>
+</div>
+</body>
+</html>

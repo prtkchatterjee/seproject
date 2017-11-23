@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+ 		<link rel="stylesheet" href="bootstrap/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="bootstrap/css/animate.css">
+  		<link href="bootstrap/css/prettyPhoto.css" rel="stylesheet">
+  		<link href="bootstrap/css/style.css" rel="stylesheet" />
+  		<script type = "text/javascript" src = "bootstrap/jquery.min.js"></script>
+  		<script type = "text/javascript" src = "bootstrap/js/bootstrap.min.js"></script>
+  		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" />
+  		<style>
+  			#logoutButton
+			{
+				position:absolute;
+				height:25px;
+				width:25px;
+				top:3%;
+				right:3%;
+			}
+  			#loading
+			{
+				position:absolute;
+				top:30%;
+				left:20%;
+				height:200px;
+				width:200px;
+			}
+  			.btn-primary
+  			{
+  				margin-left:30%;
+  				margin-top:50px;
+  				background-color:#428abc;
+  			}
+  			.btn-success,.btn-danger
+  			{
+  				margin-left:30%;
+  				margin-top:50px;
+  			}
+  			h1
+  			{
+  				color:black;
+  			}
+  			#option1button,#option2button,#option3button,#option4button
+  			{
+  				margin-left:0px;
+  				width:325px;
+  				height:30px;
+  				border-radius:10px;
+  			}
+  		</style>
+	</head>
+	<body>
+		<img id = "logoutButton" src = "Images/Logout.png">
+		<div class="container-fluid" id="box">
+		<div class="feature" id="cont1">
+			<div id="containerDiv" class="container">
+			  <div class="text-center" id="appDiv">
+			  </div>
+			</div>
+		</div>
+		<div id = "contdiv"></div>
+		</div>
+		<script>
+			logoutButton.onclick = function()
+			{
+				var inp = confirm('Are you sure you want to Logout?');
+				if(inp)
+					window.location.href = "index.html";
+			}
+			divElement = document.getElementById("box")
+			srn = localStorage.getItem('userid');
+			document.body.onload = loadSubjects;
+			
+			function loadSubjects()
+			{
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = subjectsFetched;
+				xhr.open("GET","http://seproject.azurewebsites.net/getStudentSubjects.php?userid="+srn,true);
+				xhr.send();
+				document.getElementById('containerDiv').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+
+			function subjectsFetched()
+			{
+				if(xhr.readyState==4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					var response = xhr.responseText.split(";");
+					if(response[0].trim()=="No Courses Available")
+					{
+						alert("No Courses Available");
+						window.location.href = "studentOptionSelector.html";
+					}
+					for(var i=0;i<response.length;i++)
+					{
+						var arr = JSON.parse(response[i])
+						var div1 = document.createElement("div");
+						var div2 = document.createElement("div");
+						var i1 = document.createElement("i");
+						var h2 = document.createElement("h2");
+						var p = document.createElement("p");
+						div1.className = "col-md-3";
+						div2.className = "hi-icon-wrap hi-icon-effect wow fadeInDown";
+						div2.setAttribute("data-wow-duration","1000ms");
+						div2.setAttribute("data-wow-delay","600ms");
+						i1.className = "fa fa-laptop";
+						i1.style = "background-color:#428abc";
+						h2.style = "color:#428abc";
+						h2.innerHTML = arr.course_code;
+						p.innerHTML = arr.Name;
+						div1.id = arr.course_id;
+						div1.onclick = function() {fetchQuizzes(this.id);}
+						div2.appendChild(i1);
+						div2.appendChild(h2);
+						div2.appendChild(p);
+						div1.appendChild(div2);
+						document.getElementById("appDiv").appendChild(div1);
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "Quiz.html";
+				}
+			}
+
+			function fetchQuizzes(course_id)
+			{
+				courseid = course_id;
+				document.getElementById('cont1').parentNode.removeChild(document.getElementById('cont1'));
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = remainingQuizzes;
+				xhr.open("GET","http://seproject.azurewebsites.net/getRemainingQuizzes.php?course_id="+course_id+"&srn="+srn,true);
+				xhr.send();
+			}
+
+			function remainingQuizzes()
+			{
+				if(xhr.readyState==4 && xhr.status == 200)
+				{
+					var quizzes = xhr.responseText.split(";")
+					if(quizzes[0] == "No Quiz for this Subject")
+					{
+						alert("No Quiz for this Subject");
+						window.location.href = "studentOptionSelector.html";
+					}
+					for(var i = 0; i < quizzes.length; ++i)
+					{
+						var arr = JSON.parse(quizzes[i])
+						var button = document.createElement("input");
+						button.setAttribute("type","button");
+						button.setAttribute("class","btn btn-primary");
+						button.setAttribute("value","Quiz Number - "+arr.Quiz_Number);
+						button.setAttribute("id",arr.Quiz_Number)
+						button.onclick = fetchQuiz
+						contdiv.appendChild(button);
+						contdiv.appendChild(document.createElement("br"))
+						contdiv.appendChild(document.createElement("br"))
+
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "Quiz.html";
+				}
+			}
+
+			function fetchQuiz()
+			{
+				quizNum = parseInt(this.id)
+				divElement.removeChild(contdiv);
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = quizFetched;
+				xhr.open("GET","http://seproject.azurewebsites.net/getQuiz.php?course_id="+courseid+"&quizNum="+quizNum,true);
+				xhr.send();
+			}
+			function quizFetched()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					console.log(xhr.responseText)
+					questionsList = xhr.responseText.split(";");
+					for(var i=0;i<questionsList.length;i++)
+						questionsList[i] = JSON.parse(questionsList[i]);
+					responses = Array(questionsList.length)
+					questioncount = 0;
+					correctCount = 0;
+					//randperm = shuffle()
+					//correct = questionsList[questioncount].correctAnswer
+					correct = questionsList[questioncount].CorrectOption - 1
+					var thead = document.createElement("h4");
+					thead.id = "question";
+					var option1button = document.createElement("input");
+					option1button.setAttribute("type","button");
+					option1button.setAttribute("class","btn btn-primary");
+					//option1button.setAttribute("value",questionsList[questioncount]['option'+randperm[0]]);
+					option1button.setAttribute("value",questionsList[questioncount]['option1']);
+					option1button.id = "option1button";
+					option1button.onclick = function() { showAnswer(0); }
+					var option2button = document.createElement("input");
+					option2button.setAttribute("type","button");
+					option2button.setAttribute("class","btn btn-primary");
+					//option2button.setAttribute("value",questionsList[questioncount]['option'+randperm[1]]);
+					option2button.setAttribute("value",questionsList[questioncount]['option2']);
+					option2button.id = "option2button";
+					option2button.onclick = function() { showAnswer(1); }
+					var option3button = document.createElement("input");
+					option3button.setAttribute("type","button");
+					option3button.setAttribute("class","btn btn-primary");
+					//option3button.setAttribute("value",questionsList[questioncount]['option'+randperm[2]]);
+					option3button.setAttribute("value",questionsList[questioncount]['option3']);
+					option3button.id = "option3button";
+					option3button.onclick = function() { showAnswer(2); }
+					var option4button = document.createElement("input");
+					option4button.setAttribute("type","button");
+					option4button.setAttribute("class","btn btn-primary");
+					//option4button.setAttribute("value",questionsList[questioncount]['option'+randperm[3]]);
+					option4button.setAttribute("value",questionsList[questioncount]['option4']);
+					option4button.id = "option4button";
+					option4button.onclick = function() { showAnswer(3); }
+					divElement.appendChild(thead);
+					divElement.appendChild(option1button);
+					divElement.appendChild(document.createElement("br"))
+					divElement.appendChild(document.createElement("br"))
+					divElement.appendChild(option2button);
+					divElement.appendChild(document.createElement("br"))
+					divElement.appendChild(document.createElement("br"))
+					divElement.appendChild(option3button);
+					divElement.appendChild(document.createElement("br"))
+					divElement.appendChild(document.createElement("br"))
+					divElement.appendChild(option4button);
+					divElement.appendChild(document.createElement("br"))
+					divElement.appendChild(document.createElement("br"))
+					thead.innerHTML = questionsList[questioncount].question;
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "Quiz.html";
+				}
+			}
+			function showAnswer(status)
+			{
+				s1 = status
+				var question = document.getElementById('question');
+				var option1button = document.getElementById('option1button');
+				var option2button = document.getElementById('option2button');
+				var option3button = document.getElementById('option3button');
+				var option4button = document.getElementById('option4button');
+				options = [option1button, option2button, option3button, option4button]
+				console.log(correct)
+				if(status == correct)
+				{
+					correctCount++;
+					responses[questioncount] = 1
+					options[status].setAttribute("class","btn btn-success");
+					setTimeout(moveNext, 1000)
+				}
+				else
+				{
+					responses[questioncount] =  0
+					options[status].setAttribute("class","btn btn-danger");
+					options[correct].setAttribute("class","btn btn-success");
+					setTimeout(moveNext, 3000)
+
+				}
+			}
+			function moveNext()
+			{
+				options[s1].setAttribute("class","btn btn-primary");
+				options[correct].setAttribute("class","btn btn-primary");
+				questioncount++;
+				if(questioncount < questionsList.length)
+				{
+					correct = questionsList[questioncount].CorrectOption - 1
+					question.innerHTML = questionsList[questioncount].question;
+					option1button.value = questionsList[questioncount]['option1']
+					option2button.value = questionsList[questioncount]['option2']
+					option3button.value = questionsList[questioncount]['option3']
+					option4button.value = questionsList[questioncount]['option4']	
+				}	
+				else
+				{
+					xhr = new XMLHttpRequest();
+					xhr.onreadystatechange = scoreSaved;
+					console.log("Score: " + correctCount)
+					console.log(responses)
+					console.log(JSON.stringify(responses));
+					xhr.open("GET","http://seproject.azurewebsites.net/saveScore.php?score="+JSON.stringify(responses)+"&srn="+srn+"&course_id="+courseid+"&quizNum="+quizNum,true);
+					xhr.send();
+				}
+			}
+			function scoreSaved()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					console.log(xhr.responseText)
+					divElement.removeChild(document.getElementById('option1button'));
+					divElement.removeChild(document.getElementById('option2button'));
+					divElement.removeChild(document.getElementById('option3button'));
+					divElement.removeChild(document.getElementById('option4button'));
+					alert("Quiz Score Saved Succesfully! Your score is "+correctCount);
+					window.location.href = "studentOptionSelector.html";
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "Quiz.html";
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+ 		<link rel="stylesheet" href="bootstrap/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="bootstrap/css/animate.css">
+  		<link href="bootstrap/css/prettyPhoto.css" rel="stylesheet">
+  		<link href="bootstrap/css/style.css" rel="stylesheet" />
+  		<script type = "text/javascript" src = "bootstrap/jquery.min.js"></script>
+  		<script type = "text/javascript" src = "bootstrap/js/bootstrap.min.js"></script>
+  		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" />
+		<style>
+			#logoutButton
+			{
+				position:absolute;
+				height:25px;
+				width:25px;
+				top:3%;
+				right:3%;
+			}
+			#loading
+			{
+				position:absolute;
+				top:30%;
+				left:20%;
+				height:200px;
+				width:200px;
+			}
+			input[type=button]
+			{
+				background-color:#428abc;
+			}
+			#panel1
+			{
+				width:100%;
+				height:240px;
+			}
+		</style>
+	</head>
+	<body>
+		<img id = "logoutButton" src = "Images/Logout.png">
+		<div class="feature">
+			<div id="containerDiv" class="container">
+			  <div class="text-center" id="appDiv">
+			  </div>
+			</div>
+		</div>
+		<script>
+			logoutButton.onclick = function()
+			{
+				var inp = confirm('Are you sure you want to Logout?');
+				if(inp)
+					window.location.href = "index.html";
+			}
+			document.body.onload = loadSubjects;
+			function loadSubjects()
+			{
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = subjectsFetched;
+				xhr.open("GET","http://seproject.azurewebsites.net/getSubjects.php?userid="+localStorage.getItem('userid'),true);
+				xhr.send();
+				document.getElementById('containerDiv').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+			function subjectsFetched()
+			{
+				if(xhr.readyState==4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					var response = xhr.responseText.split(";");
+					if(response[0].trim()=="No Courses Available")
+					{
+						document.getElementById('appDiv').innerHTML = "No Courses Available";
+					}
+					for(var i=0;i<response.length;i++)
+					{
+						var arr = JSON.parse(response[i])
+						var div1 = document.createElement("div");
+						var div2 = document.createElement("div");
+						var i1 = document.createElement("i");
+						var h2 = document.createElement("h2");
+						var p = document.createElement("p");
+						div1.className = "col-md-3";
+						div2.className = "hi-icon-wrap hi-icon-effect wow fadeInDown";
+						div2.setAttribute("data-wow-duration","1000ms");
+						div2.setAttribute("data-wow-delay","600ms");
+						i1.className = "fa fa-book";
+						i1.style = "background-color:#428abc";
+						h2.style = "color:#428abc";
+						h2.innerHTML = arr.course_code;
+						p.innerHTML = arr.Name;
+						div1.id = arr.course_id;
+						div1.onclick = function() {enterAssignment(this.id);}
+						div2.appendChild(i1);
+						div2.appendChild(h2);
+						div2.appendChild(p);
+						div1.appendChild(div2);
+						document.getElementById("appDiv").appendChild(div1);
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+			function enterAssignment(courseid)
+			{
+				course_id = courseid;
+				var containerDiv = document.getElementById('containerDiv');
+				containerDiv.removeChild(document.getElementById('appDiv'));
+				var appDiv = document.createElement("div");
+				appDiv.id = "appDiv";
+				appDiv.className = "text-center";
+				containerDiv.appendChild(appDiv);
+				var panel = document.createElement("div");
+				panel.id = "panel1";
+				panel.className = "panel panel-primary";
+				var panelHeading = document.createElement("div");
+				panelHeading.className = "panel-heading";
+				panelHeading.innerHTML = "Problem Statement";
+				var panelBody = document.createElement("div");
+				panelBody.className = "panel-body form-group";
+				var ta = document.createElement("textarea");
+				ta.className = "form-control";
+				ta.rows = "7";
+				ta.id = "ta";
+				ta.setAttribute("placeholder","Please enter Problem Statement");
+				panelBody.appendChild(ta);
+				panel.appendChild(panelHeading);
+				panel.appendChild(panelBody);
+				appDiv.appendChild(panel);
+				appDiv.appendChild(document.createElement("br"));
+				panel = document.createElement("div");
+				panel.className = "panel panel-primary";
+				panelHeading = document.createElement("div");
+				panelHeading.className = "panel-heading";
+				panelHeading.innerHTML = "Due Date";
+				panelBody = document.createElement("div");
+				panelBody.className = "panel-body form-group";
+				dueDate = document.createElement("input");
+				dueDate.className = "form-control";
+				dueDate.id = "dateinp";
+				dueDate.setAttribute("type","date");
+				panelBody.appendChild(dueDate);
+				panel.appendChild(panelHeading);
+				panel.appendChild(panelBody);
+				appDiv.appendChild(panel);
+				appDiv.appendChild(document.createElement("br"));
+				var submitButton = document.createElement("input");
+				submitButton.onclick = submitAssignment;
+				submitButton.setAttribute("type","button");
+				submitButton.className = "btn btn-primary";
+				submitButton.value = "SUBMIT";
+				appDiv.appendChild(submitButton);
+			}
+			function submitAssignment()
+			{
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = success;
+				var d = document.getElementById('dateinp').value.split("-");
+				var dte = d[2]+"_"+d[1]+"_"+d[0];
+				xhr.open("GET","http://seproject.azurewebsites.net/saveAssignments.php?courseid="+course_id+"&question="+document.getElementById('ta').value+"&duedate="+dte,true);
+				xhr.send();
+				document.getElementById('containerDiv').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+			function success()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					document.getElementById('containerDiv').removeChild(document.getElementById('appDiv'));
+					alert(xhr.responseText);
+					window.location.href = "facultyOptionSelector.html";
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+		</script>
+	</body>
+</html>

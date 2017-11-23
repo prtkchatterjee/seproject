@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+ 		<link rel="stylesheet" href="bootstrap/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="bootstrap/css/animate.css">
+  		<link href="bootstrap/css/prettyPhoto.css" rel="stylesheet">
+  		<link href="bootstrap/css/style.css" rel="stylesheet" />
+  		<script type = "text/javascript" src = "bootstrap/jquery.min.js"></script>
+  		<script type = "text/javascript" src = "bootstrap/js/bootstrap.min.js"></script>
+  		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" />
+		<style>
+			#logoutButton
+			{
+				position:absolute;
+				height:25px;
+				width:25px;
+				top:3%;
+				right:3%;
+			}
+		</style>
+	</head>
+	<body>
+	<img id = "logoutButton" src = "Images/Logout.png">
+		<!--<a href = "http://seproject.azurewebsites.net/Attendance.html">Mark Attendance</a><br><br><br>
+		<a href = "http://seproject.azurewebsites.net/addQuestions.html">Send Out Quizzes</a><br><br><br>
+		<a href = "http://seproject.azurewebsites.net/Assignment.html">Send Out Assignments</a>-->
+   <div class="feature">
+    <div class="container">
+      <div class="text-center">
+        <div class="col-md-3" id = "div1">
+          <div class="hi-icon-wrap hi-icon-effect wow fadeInDown" data-wow-duration="1000ms" data-wow-delay="300ms">
+            <i class="fa fa-book" style="background-color:#428abc"></i>
+            <h2 style="color:#428abc">View Results</h2>
+            <p>Student Performance for the Recent Examinations</p>
+          </div>
+        </div>
+        <div class="col-md-3" id = "div2">
+          <div class="hi-icon-wrap hi-icon-effect wow fadeInDown" data-wow-duration="1000ms" data-wow-delay="300ms">
+            <i class="fa fa-laptop" style="background-color:#428abc"></i>
+            <h2 style="color:#428abc">View Quizzes</h2>
+            <p>Interactive Practice Quizzes</p>
+          </div>
+        </div>
+        <div class="col-md-3" id = "div3">
+          <div class="hi-icon-wrap hi-icon-effect wow fadeInDown" data-wow-duration="1000ms" data-wow-delay="600ms">
+            <i class="fa fa-laptop" style="background-color:#428abc"></i>
+            <h2 style="color:#428abc">View Assignments</h2>
+            <p>List of Assignment Questions</p>
+          </div>
+        </div>
+        <div class="col-md-3" id = "div4">
+          <div class="hi-icon-wrap hi-icon-effect wow fadeInDown" data-wow-duration="1000ms" data-wow-delay="600ms">
+            <i class="fa fa-calendar" style="background-color:#428abc"></i>
+            <h2 style="color:#428abc">Calendar</h2>
+            <p>Organize your Schedule</p>
+          </div>
+        </div>
+        <div class="col-md-3" id = "div5">
+          <div class="hi-icon-wrap hi-icon-effect wow fadeInDown" data-wow-duration="1000ms" data-wow-delay="600ms">
+            <i class="fa fa-calendar" style="background-color:#428abc"></i>
+            <h2 style="color:#428abc">TimeTable</h2>
+            <p>View your Timetable</p>
+          </div>
+        </div>
+        <div class="col-md-3" id = "div6">
+          <div class="hi-icon-wrap hi-icon-effect wow fadeInDown" data-wow-duration="1000ms" data-wow-delay="600ms">
+            <i class="fa fa-book" style="background-color:#428abc"></i>
+            <h2 style="color:#428abc">Course Registration</h2>
+            <p>Register for your Selected Courses</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+		<script>
+			logoutButton.onclick = function()
+			{
+				var inp = confirm('Are you sure you want to Logout?');
+				if(inp)
+					window.location.href = "index.html";
+			}
+			document.getElementById('div1').onclick = function() {
+				window.location.href = "displayResults.html";
+			}
+			document.getElementById('div2').onclick = function() {
+				window.location.href = "Quiz.html";
+			}
+			document.getElementById('div3').onclick = function() {
+				window.location.href = "ViewAssignment.html";
+			}
+			document.getElementById('div4').onclick = function() {
+				window.location.href = "calendar.html";
+			}
+			document.getElementById('div5').onclick = function() {
+				window.location.href = "viewTimetable.html";
+			}
+			document.getElementById('div6').onclick = function() {
+				window.location.href = "CourseRegistration.html";
+			}
+		</script>
+	</body>
+</html>

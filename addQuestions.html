@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+ 		<link rel="stylesheet" href="bootstrap/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="bootstrap/css/animate.css">
+  		<link href="bootstrap/css/prettyPhoto.css" rel="stylesheet">
+  		<link href="bootstrap/css/style.css" rel="stylesheet" />
+  		<script type = "text/javascript" src = "bootstrap/jquery.min.js"></script>
+  		<script type = "text/javascript" src = "bootstrap/js/bootstrap.min.js"></script>
+  		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" />
+		<style>
+			#logoutButton
+			{
+				position:absolute;
+				height:25px;
+				width:25px;
+				top:3%;
+				right:3%;
+			}
+			#loading
+			{
+				position:absolute;
+				top:30%;
+				left:20%;
+				height:200px;
+				width:200px;
+			}
+			.btn-primary
+			{
+				border-radius:0px;
+				background-color:#428abc;
+			}
+			#panelBody
+			{
+				height:250px;
+			}
+			#panel1
+			{
+				margin-top:100px;
+			}
+		</style>
+	</head>
+	<body>
+		<img id = "logoutButton" src = "Images/Logout.png">
+		<div class="feature">
+			<div id="containerDiv" class="container">
+			  <div class="text-center" id="appDiv">
+			  </div>
+			</div>
+		</div>
+		<script>
+			logoutButton.onclick = function()
+			{
+				var inp = confirm('Are you sure you want to Logout?');
+				if(inp)
+					window.location.href = "index.html";
+			}
+			document.body.onload = loadSubjects;
+			function loadSubjects()
+			{
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = subjectsFetched;
+				xhr.open("GET","http://seproject.azurewebsites.net/getSubjects.php?userid="+localStorage.getItem('userid'),true);
+				xhr.send();
+				document.getElementById('containerDiv').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+			function subjectsFetched()
+			{
+				if(xhr.readyState==4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					var response = xhr.responseText.split(";");
+					if(response[0].trim()=="No Courses Available")
+					{
+						document.getElementById('appDiv').innerHTML = "No Courses Available";
+					}
+					for(var i=0;i<response.length;i++)
+					{
+						var arr = JSON.parse(response[i])
+						var div1 = document.createElement("div");
+						var div2 = document.createElement("div");
+						var i1 = document.createElement("i");
+						var h2 = document.createElement("h2");
+						var p = document.createElement("p");
+						div1.className = "col-md-3";
+						div2.className = "hi-icon-wrap hi-icon-effect wow fadeInDown";
+						div2.setAttribute("data-wow-duration","1000ms");
+						div2.setAttribute("data-wow-delay","600ms");
+						i1.className = "fa fa-book";
+						i1.style = "background-color:#428abc";
+						h2.style = "color:#428abc";
+						h2.innerHTML = arr.course_code;
+						p.innerHTML = arr.Name;
+						div1.id = arr.course_id;
+						div1.onclick = function() {addQuiz(this.id);}
+						div2.appendChild(i1);
+						div2.appendChild(h2);
+						div2.appendChild(p);
+						div1.appendChild(div2);
+						document.getElementById("appDiv").appendChild(div1);
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+			correctOption = 'A';
+			function addQuiz(course_id)
+			{
+				$('link[rel=stylesheet][href~="bootstrap/css/font-awesome.min.css"]').remove();
+				$('link[rel=stylesheet][href~="bootstrap/css/animate.css"]').remove();
+				$('link[rel=stylesheet][href~="bootstrap/css/prettyPhoto.css"]').remove();
+				$('link[rel=stylesheet][href~="bootstrap/css/style.css"]').remove();
+				var containerDiv = document.getElementById('containerDiv');
+				courseid = course_id;
+				containerDiv.removeChild(document.getElementById('appDiv'));
+				var question_count = 1
+				var text = {};
+				var appDiv = document.createElement("div");
+				appDiv.id = "appDiv";
+				appDiv.className = "text-center";
+				containerDiv.appendChild(appDiv);
+				var panel = document.createElement("div");
+				panel.id = "panel1";
+				panel.className = "panel panel-primary";
+				var panelHeading = document.createElement("div");
+				panelHeading.className = "panel-heading";
+				var questionDiv = document.createElement("div");
+				questionDiv.className = "input-group";
+				var questionIconSpan = document.createElement("span");
+				questionIconSpan.className = "input-group-addon";
+				questionIconSpan.innerHTML = "?";
+				questionIconSpan.setAttribute("style","background-color:#d0cfcf;color:black");
+				questionDiv.appendChild(questionIconSpan);
+				var questionInput = document.createElement("input");
+				questionInput.className = "form-control";
+				questionInput.setAttribute("type","text");
+				questionInput.setAttribute("placeholder","Question");
+				questionInput.id = "questionBox";
+				questionDiv.appendChild(questionInput);
+				panelHeading.appendChild(questionDiv);
+				var panelBody = document.createElement("div");
+				panelBody.id = "panelBody";
+				panelBody.className = "panel-body form-group";
+				for(var i = 1; i <= 4; i++)
+				{
+					var c = String.fromCharCode(64+i);
+					var optionDiv = document.createElement("div");
+					optionDiv.className = "input-group";
+					var optionSpan = document.createElement("span");
+					optionSpan.className = "input-group-addon";
+					optionSpan.innerHTML = c;
+					optionSpan.id = c;
+					if(c == 'A')
+					{
+						optionSpan.setAttribute("style","background-color:#4adf5b;color:white");
+					}
+					else
+					{
+						optionSpan.setAttribute("style","background-color:#d0cfcf;color:black");
+					}
+					optionSpan.onclick = function() {
+						document.getElementById(correctOption).setAttribute("style","background-color:#d0cfcf;color:black");
+						correctOption = this.id;
+						document.getElementById(this.id).setAttribute("style","background-color:#4adf5b;color:white");
+					}
+					optionDiv.appendChild(optionSpan);
+					var optionInput = document.createElement("input");
+					optionInput.className = "form-control";
+					optionInput.setAttribute("type","text");
+					optionInput.setAttribute("placeholder","Enter Option");
+					optionInput.id = "option"+c;
+					optionDiv.appendChild(optionInput);
+					panelBody.appendChild(optionDiv);
+					panelBody.appendChild(document.createElement("br"));
+				}
+				panel.appendChild(panelHeading);
+				panel.appendChild(panelBody);
+				appDiv.appendChild(panel);
+				var nextbutton = document.createElement("div");
+				var nextIconSpan = document.createElement("span");
+				nextIconSpan.className = "btn btn-primary";
+				var nextIcon = document.createElement("i");
+				nextIcon.className = "glyphicon glyphicon-circle-arrow-right";
+				nextIconSpan.appendChild(nextIcon);
+				nextbutton.appendChild(nextIconSpan);
+				var nextSpan = document.createElement("span");
+				nextSpan.className = "btn btn-primary";
+				nextSpan.innerHTML = "NEXT";
+				nextbutton.appendChild(nextSpan);
+				var questionBox = document.getElementById('questionBox');
+				var optionBox1 = document.getElementById('optionA');
+				var optionBox2 = document.getElementById('optionB');
+				var optionBox3 = document.getElementById('optionC');
+				var optionBox4 = document.getElementById('optionD');
+				nextbutton.onclick = function() { 
+					var tempobj = {};
+					tempobj["question"] = questionBox.value;
+					tempobj["option1"] = optionBox1.value;
+					tempobj["option2"] = optionBox2.value;
+					tempobj["option3"] = optionBox3.value;
+					tempobj["option4"] = optionBox4.value;
+					tempobj["correctOption"] = correctOption.charCodeAt(0)-64;
+					text["question"+question_count] = tempobj;
+					tempobj = null;
+					question_count+=1;
+					questionBox.value = "";
+					optionBox1.value = "";
+					optionBox2.value = "";
+					optionBox3.value = "";
+					optionBox4.value = "";
+				}
+				appDiv.appendChild(nextbutton);
+				var savebutton = document.createElement("div");
+				var saveIconSpan = document.createElement("span");
+				saveIconSpan.className = "btn btn-primary";
+				var saveIcon = document.createElement("i");
+				saveIcon.className = "glyphicon glyphicon-download-alt";
+				saveIconSpan.appendChild(saveIcon);
+				savebutton.appendChild(saveIconSpan);
+				var saveSpan = document.createElement("span");
+				saveSpan.className = "btn btn-primary";
+				saveSpan.innerHTML = "SAVE";
+				savebutton.appendChild(saveSpan);
+				savebutton.onclick = function() {
+					var tempobj = {};
+					tempobj["question"] = questionBox.value;
+					tempobj["option1"] = optionBox1.value;
+					tempobj["option2"] = optionBox2.value;
+					tempobj["option3"] = optionBox3.value;
+					tempobj["option4"] = optionBox4.value;
+					tempobj["correctOption"] = correctOption.charCodeAt(0)-64;
+					text["question"+question_count] = tempobj;
+					tempobj = null;
+					saveQuiz(text); }
+				appDiv.appendChild(document.createElement("br"));
+				appDiv.appendChild(savebutton);
+			}
+
+			function saveQuiz(text)
+			{
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = quizSaved;
+				xhr.open("GET","http://seproject.azurewebsites.net/saveQuiz.php?course="+courseid+"&obj="+JSON.stringify(text),true);
+				xhr.send();
+
+			}
+
+			function quizSaved()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					document.getElementById('appDiv').parentNode.removeChild(document.getElementById('appDiv'));
+					alert("Quiz Saved Succesfully!");
+					window.location.href = "facultyOptionSelector.html";
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+
+		</script>
+	</body>
+</html>

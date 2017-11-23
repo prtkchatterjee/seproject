@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel = "stylesheet" type ="text/css" href = "bootstrap/css/bootstrap.css">
+  		<script type = "text/javascript" src = "bootstrap/jquery.min.js"></script>
+  		<script type = "text/javascript" src = "bootstrap/js/bootstrap.min.js"></script>
+  		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" />
+		<style>
+			#loading
+			{
+				position:absolute;
+				top:30%;
+				left:20%;
+				height:200px;
+				width:200px;
+			}
+			body
+			{
+				background: url('Images/PESU_Campus.jpg') fixed;
+				background-position:-200px 170px;
+				background-size: cover;
+				padding: 0;
+				margin: 0;
+				height: 100%;
+				overflow:hidden;
+			}
+			.wrap
+			{
+				width: 100%;
+				height: 100%;
+				min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+				min-height: 100vh; /* These two lines are counted as one :-)       */
+				display: flex;
+				align-items: center;
+			}
+
+			p.form-title
+			{
+				font-family: 'Arial' , sans-serif;
+				font-size: 20pt;
+				font-weight: 600;
+				text-align: center;
+				color: #FFFFFF;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+			}
+
+			form
+			{
+				width: 250px;
+				margin: 0 auto;
+				margin-top:80px;
+			}
+
+			form.login input[type="text"], form.login input[type="password"]
+			{
+				width: 100%;
+				margin: 0;
+				padding: 5px 10px;
+				background: 0;
+				border: 0;
+				border-bottom: 1px solid #FFFFFF;
+				outline: 0;
+				font-style: italic;
+				font-size: 12pt;
+				font-weight: 400;
+				letter-spacing: 1px;
+				margin-bottom: 5px;
+				color: #FFFFFF;
+				outline: 0;
+			}
+
+			form.login input[type="button"]
+			{
+				width: 100%;
+				font-size: 14pt;
+				text-transform: uppercase;
+				font-weight: 500;
+				margin-top: 16px;
+				outline: 0;
+				cursor: pointer;
+				letter-spacing: 1px;
+			}
+
+			form.login input[type="button"]:hover
+			{
+				transition: background-color 0.5s ease;
+			}
+
+			form.login .remember-forgot
+			{
+				float: left;
+				width: 100%;
+				margin: 10px 0 0 0;
+			}
+			form.login .forgot-pass-content
+			{
+				min-height: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+			form.login label, form.login a
+			{
+				font-size: 12pt;
+				font-weight: 400;
+				color: #FFFFFF;
+			}
+
+			form.login a
+			{
+				transition: color 0.5s ease;
+			}
+
+			form.login a:hover
+			{
+				color: #2ecc71;
+			}
+			::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+				color: white;
+			}
+			.form-title
+			{
+				position:absolute;
+				top:30%;
+				width:100%;
+				background-color:#428bca;
+				margin-top:50px;
+			}
+			#PESU_Logo
+			{
+				position:relative;
+				left:22%;
+				width:60%;
+				height:15%;
+				margin-top:25px;
+			}
+		</style>
+	</head>
+	<body>
+		<img id = "PESU_Logo" src = "Images/PESU_Logo.png">
+		<p class="form-title">PESU UMS</p>
+		<div class="container" id="containerDiv">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="wrap">
+				        <form class="login">
+				        		<input type="text" id="userid" placeholder="Username" />
+						    <input type="password" id="password" placeholder="Password" />
+						    <input type="button" id = "submitbutton" value="Sign In" class="btn btn-primary btn-sm" />
+				        </form>
+				    </div>
+				</div>
+			</div>
+		</div>
+		<script>
+			var submitbutton = document.getElementById('submitbutton');
+			submitbutton.onclick = loginRequest;
+			localStorage.clear();
+			userid = document.getElementById("userid");
+			password = document.getElementById("password");
+			function loginRequest()
+			{
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = loginResponse;
+				xhr.open("GET","http://seproject.azurewebsites.net/authenticate.php?userid="+userid.value+"&password="+password.value,true);
+				xhr.send();
+				document.getElementById('containerDiv').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+				
+			}
+			function loginResponse()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					var response = xhr.responseText;
+					if(response == 'S')
+					{
+						localStorage.setItem('userid',userid.value);
+						localStorage.setItem('usertype',response);
+						window.location.href = "studentOptionSelector.html";
+					}
+					else if(response == 'F')
+					{
+						localStorage.setItem('userid',userid.value);
+						localStorage.setItem('usertype',response);
+						window.location.href = "facultyOptionSelector.html";
+					}
+					else
+					{
+						alert('Invalid Credentials!');
+						window.location.href = "index.html";
+						userid.value = "";
+						password.value = "";
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "index.html";
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	  	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+ 		<link rel="stylesheet" href="bootstrap/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="bootstrap/css/animate.css">
+  		<link href="bootstrap/css/prettyPhoto.css" rel="stylesheet">
+  		<link href="bootstrap/css/style.css" rel="stylesheet" />
+  		<script type = "text/javascript" src = "bootstrap/jquery.min.js"></script>
+  		<script type = "text/javascript" src = "bootstrap/js/bootstrap.min.js"></script>
+  		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" />
+  		<style>
+			#logoutButton
+			{
+				position:absolute;
+				height:25px;
+				width:25px;
+				top:3%;
+				right:3%;
+			}
+			#loading
+			{
+				position:absolute;
+				top:30%;
+				left:20%;
+				height:200px;
+				width:200px;
+			}
+			.panel-heading
+			{
+				font-size:14pt;
+			}
+			.panel-body
+			{
+				color:#428abc;
+			}
+			.selectpicker
+			{
+				background-color:#428abc;
+				font-size:14pt;
+				border-radius:3px;
+			}
+			#detailsDiv
+			{
+				margin-left:-80px;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<img id = "logoutButton" src = "Images/Logout.png">
+		<div class="feature">
+			<div id="containerDiv" class="container">
+			  <div class="text-center" id="appDiv">
+			  </div>
+			</div>
+		</div>
+		<script>
+			logoutButton.onclick = function()
+			{
+				var inp = confirm('Are you sure you want to Logout?');
+				if(inp)
+					window.location.href = "index.html";
+			}
+			userid = localStorage.getItem('userid');
+			document.body.onload = loadSubjects;
+			function loadSubjects()
+			{
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = subjectsFetched;
+				xhr.open("GET","http://seproject.azurewebsites.net/getSubjects.php?userid="+userid,true);
+				xhr.send();
+				document.getElementById('containerDiv').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+			function subjectsFetched()
+			{
+				if(xhr.readyState==4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					var response = xhr.responseText.split(";");
+					for(var i=0;i<response.length;i++)
+					{
+						var arr = JSON.parse(response[i])
+						/*var button = document.createElement("input");
+						button.setAttribute("type","button");
+						button.setAttribute("value",arr.course_code+" - "+arr.Name);
+						button.id = arr.course_id;
+						button.onclick = function() {fetchAssignments(this.id);}
+						contdiv.appendChild(button);*/
+						var div1 = document.createElement("div");
+						var div2 = document.createElement("div");
+						var i1 = document.createElement("i");
+						var h2 = document.createElement("h2");
+						var p = document.createElement("p");
+						div1.className = "col-md-3";
+						div2.className = "hi-icon-wrap hi-icon-effect wow fadeInDown";
+						div2.setAttribute("data-wow-duration","1000ms");
+						div2.setAttribute("data-wow-delay","600ms");
+						i1.className = "fa fa-laptop";
+						i1.style = "background-color:#428abc";
+						h2.style = "color:#428abc";
+						h2.innerHTML = arr.course_code;
+						p.innerHTML = arr.Name;
+						div1.id = arr.course_id;
+						div1.onclick = function() {fetchStudents(this.id);}
+						div2.appendChild(i1);
+						div2.appendChild(h2);
+						div2.appendChild(p);
+						div1.appendChild(div2);
+						document.getElementById("appDiv").appendChild(div1);
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+			function fetchStudents(courseid)
+			{
+				course_id = courseid;
+				//box.removeChild(contdiv);
+				document.getElementById("appDiv").parentNode.removeChild(document.getElementById("appDiv"));
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = studentsFetched;
+				xhr.open("GET","http://seproject.azurewebsites.net/getStudentsInCourse.php?course_id="+course_id,true);
+				xhr.send();
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+			function studentsFetched()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					studentList = xhr.responseText.split(";");
+					for(var i=0;i<studentList.length;i++)
+						studentList[i] = JSON.parse(studentList[i]);
+					studentcount = 0;
+					var dropdown = document.createElement("select");
+					dropdown.setAttribute("class","selectpicker")
+					var option = document.createElement("option");
+					option.innerHTML = "Select Student";
+					dropdown.appendChild(option)	
+					dropdown.id = "studentname";
+					for(var i=0; i < studentList.length; ++i)
+					{
+						option = document.createElement("option");
+						option.setAttribute("value", studentList[i].srn)
+						option.innerHTML = studentList[i].name;
+						dropdown.appendChild(option)
+					}
+					console.log(studentList.length)
+					dropdown.setAttribute("class","selectpicker")
+					dropdown.onchange = update;
+					document.getElementById('containerDiv').appendChild(dropdown)
+					detailsDiv = document.createElement("div")
+					detailsDiv.id = 'detailsDiv';
+					document.getElementById('containerDiv').appendChild(detailsDiv)
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+			function update()
+			{
+				srn = this.value;
+				console.log(srn+","+course_id);
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = displayDetail;
+				xhr.open("GET","http://seproject.azurewebsites.net/getDetails.php?srn="+srn+"&course_id="+course_id,true);
+				xhr.send();	
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);			
+			}
+			function displayDetail()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					var response = xhr.responseText.split("?");
+					console.log(response)
+					attendance = response[0].split(";");
+					var quiz_scores = response[1].split(";");
+					var total_classes = parseInt(JSON.parse(attendance[0]).count);
+					var present = parseInt(JSON.parse(attendance[1]).count);
+					for(var i = 0 ; i < quiz_scores.length; ++i)
+						quiz_scores[i] = JSON.parse(quiz_scores[i]);
+
+					var piechart = document.createElement("div");
+					piechart.id = "piechart";
+					google.charts.load('current', {'packages':['corechart']});
+					google.charts.setOnLoadCallback(drawChart);
+
+					// Draw the chart and set the chart values
+					function drawChart() {
+					  var data = google.visualization.arrayToDataTable([
+					  ['Status','No. of Classes'],
+					  ['Present - '+present, present],
+					  ['Absent - '+(total_classes-present), total_classes-present]
+					]);
+
+					  // Optional; add a title and set the width and height of the chart
+					  var options = {'title':'Attendance Summary (Total Classes: '+total_classes+')', 'width':400, 'height':300};
+
+					  // Display the chart inside the <div> element with id="piechart"
+					  var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+					  chart.draw(data, options);
+					}
+					detailsDiv.appendChild(piechart);
+					t = 0;
+					for (var i = 0; i < quiz_scores.length; i++) {
+
+						var piechart1 = document.createElement("div");
+						piechart1.id = "piechart"+i;
+						google.charts.load('current', {'packages':['corechart']});
+						google.charts.setOnLoadCallback(drawChart1);
+
+						// Draw the chart and set the chart values
+						function drawChart1() {
+						  var data1 = google.visualization.arrayToDataTable([
+						  ['Status','Questions'],
+						  ['Correct - '+quiz_scores[t].sum, parseInt(quiz_scores[t].sum)],
+						  ['Incorrect - '+(quiz_scores[t].count-quiz_scores[t].sum), parseInt(quiz_scores[t].count)-parseInt(quiz_scores[t].sum)],
+						]);
+
+						  // Optional; add a title and set the width and height of the chart
+						  var options1 = {'title':'Quiz '+ quiz_scores[t].quiz_number + ' Summary (Total Questions: '+quiz_scores[t].count+')', 'width':400, 'height':300};
+
+						  // Display the chart inside the <div> element with id="piechart"
+						  var chart1 = new google.visualization.PieChart(document.getElementById('piechart'+t));
+						  chart1.draw(data1, options1);
+						  t++;
+						}
+						detailsDiv.appendChild(piechart1);
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+ 		<link rel="stylesheet" href="bootstrap/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="bootstrap/css/animate.css">
+  		<link href="bootstrap/css/prettyPhoto.css" rel="stylesheet">
+  		<link href="bootstrap/css/style.css" rel="stylesheet" />
+  		<script type = "text/javascript" src = "bootstrap/jquery.min.js"></script>
+  		<script type = "text/javascript" src = "bootstrap/js/bootstrap.min.js"></script>
+  		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" />
+		<style>
+			#logoutButton
+			{
+				position:absolute;
+				height:25px;
+				width:25px;
+				top:3%;
+				right:3%;
+			}
+			#loading
+			{
+				position:absolute;
+				top:30%;
+				left:20%;
+				height:200px;
+				width:200px;
+			}
+			.topName
+			{
+				display:inline;
+			}
+			.btn-primary
+			{
+				background-color:#428abc;
+			}
+			#studentsrn,#studentname
+			{
+				position:relative;
+				top:-40px;
+			}
+		</style>
+	</head>
+	<body>
+		<img id = "logoutButton" src = "Images/Logout.png">
+		<div class="feature">
+			<div id="containerDiv" class="container">
+			  <div class="text-center" id="appDiv">
+			  </div>
+			</div>
+		</div>
+		<script>
+			logoutButton.onclick = function()
+			{
+				var inp = confirm('Are you sure you want to Logout?');
+				if(inp)
+					window.location.href = "index.html";
+			}
+			document.body.onload = loadSubjects;
+			function loadSubjects()
+			{
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = subjectsFetched;
+				xhr.open("GET","http://seproject.azurewebsites.net/getSubjects.php?userid="+localStorage.getItem('userid'),true);
+				xhr.send();
+				document.getElementById('containerDiv').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+			function subjectsFetched()
+			{
+				if(xhr.readyState==4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					var response = xhr.responseText.split(";");
+					if(response[0].trim()=="No Courses Available")
+					{
+						document.getElementById('appDiv').innerHTML = "No Courses Available";
+					}
+					for(var i=0;i<response.length;i++)
+					{
+						var arr = JSON.parse(response[i])
+						var div1 = document.createElement("div");
+						var div2 = document.createElement("div");
+						var i1 = document.createElement("i");
+						var h2 = document.createElement("h2");
+						var p = document.createElement("p");
+						div1.className = "col-md-3";
+						div2.className = "hi-icon-wrap hi-icon-effect wow fadeInDown";
+						div2.setAttribute("data-wow-duration","1000ms");
+						div2.setAttribute("data-wow-delay","600ms");
+						i1.className = "fa fa-book";
+						i1.style = "background-color:#428abc";
+						h2.style = "color:#428abc";
+						h2.innerHTML = arr.course_code;
+						p.innerHTML = arr.Name;
+						div1.id = arr.course_id;
+						div1.onclick = function() {fetchStudents(this.id);}
+						div2.appendChild(i1);
+						div2.appendChild(h2);
+						div2.appendChild(p);
+						div1.appendChild(div2);
+						document.getElementById("appDiv").appendChild(div1);
+					}
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+			function fetchStudents(course_id)
+			{
+				courseid = course_id;
+				document.getElementById("appDiv").parentNode.removeChild(document.getElementById("appDiv"));
+				xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = studentsFetched;
+				xhr.open("GET","http://seproject.azurewebsites.net/getStudentsInCourse.php?course_id="+course_id,true);
+				xhr.send();
+				document.getElementById('containerDiv').style = "opacity:0.2";
+				var bgimage = document.createElement("img");
+				bgimage.id = "loading";
+				bgimage.src = "Images/loading.gif";
+				document.body.appendChild(bgimage);
+			}
+			function studentsFetched()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					studentList = xhr.responseText.split(";");
+					attendance = []
+					for(var i=0;i<studentList.length;i++)
+						studentList[i] = JSON.parse(studentList[i]);
+					studentcount = 0;
+					var namediv1 = document.createElement("div");
+					namediv1.className = "btn btn-primary topName";
+					namediv1.id = "studentsrn";
+					namediv1.innerHTML = studentList[studentcount].srn;
+					var namediv2 = document.createElement("div");
+					namediv2.className = "btn btn-default topName";
+					namediv2.id = "studentname";
+					namediv2.innerHTML = studentList[studentcount].name;
+					document.getElementById("containerDiv").appendChild(namediv1);
+					document.getElementById("containerDiv").appendChild(namediv2);
+					var appDiv = document.createElement("div");
+					appDiv.id = "appDiv";
+					appDiv.style = "position:relative;top:-90px;";
+					appDiv.className = "text-center";
+					document.getElementById("containerDiv").appendChild(appDiv);
+					var div1 = document.createElement("div");
+					var div2 = document.createElement("div");
+					var i1 = document.createElement("i");
+					var h2 = document.createElement("h2");
+					div1.className = "col-md-3";
+					div1.id = "presentbutton";
+					div2.className = "hi-icon-wrap hi-icon-effect wow fadeInDown";
+					div2.setAttribute("data-wow-duration","1000ms");
+					div2.setAttribute("data-wow-delay","600ms");
+					i1.className = "fa fa-thumbs-up";
+					i1.style = "background-color:#428abc";
+					div1.onclick = function() {moveNext(1);}
+					h2.style = "color:#428abc";
+					h2.innerHTML = "PRESENT";
+					div2.appendChild(i1);
+					div2.appendChild(h2);
+					div1.appendChild(div2);
+					document.getElementById("appDiv").appendChild(div1);
+					var div3 = document.createElement("div");
+					var div4 = document.createElement("div");
+					var i2 = document.createElement("i");
+					var h4 = document.createElement("h2");
+					div3.className = "col-md-3";
+					div3.id = "absentbutton";
+					div4.className = "hi-icon-wrap hi-icon-effect wow fadeInDown";
+					div4.setAttribute("data-wow-duration","1000ms");
+					div4.setAttribute("data-wow-delay","600ms");
+					i2.className = "fa fa-thumbs-down";
+					i2.style = "background-color:#428abc";
+					div3.onclick = function() {moveNext(0);}
+					h4.style = "color:#428abc";
+					h4.innerHTML = "ABSENT";
+					div4.appendChild(i2);
+					div4.appendChild(h4);
+					div3.appendChild(div4);
+					document.getElementById("appDiv").appendChild(div3);
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+			function moveNext(status)
+			{
+				var studentsrn = document.getElementById('studentsrn');
+				var studentname = document.getElementById('studentname');
+				var presentbutton = document.getElementById('presentbutton');
+				var absentbutton = document.getElementById('absentbutton');
+				attendance.push(status);
+				studentcount++;
+				if(studentcount < studentList.length)
+				{
+					studentsrn.innerHTML = studentList[studentcount].srn;
+					studentname.innerHTML = studentList[studentcount].name;
+				}
+				else
+				{
+					var tmpstr = "";
+					for(var i=0;i<studentList.length;i++)
+					{
+						tmpstr += studentList[i].srn+","+attendance[i];
+						if(i != studentList.length-1)
+							tmpstr += ";";
+					}
+					tmpobj = {"course_id":courseid,"attendance":tmpstr};
+					xhr = new XMLHttpRequest();
+					xhr.onreadystatechange = attendanceMarked;
+					xhr.open("GET","http://seproject.azurewebsites.net/markAttendance.php?obj="+JSON.stringify(tmpobj),true);
+					xhr.send();
+					document.getElementById('containerDiv').style = "opacity:0.2";
+					var bgimage = document.createElement("img");
+					bgimage.id = "loading";
+					bgimage.src = "Images/loading.gif";
+					document.body.appendChild(bgimage);
+				}
+			}
+			function attendanceMarked()
+			{
+				if(xhr.readyState == 4 && xhr.status == 200)
+				{
+					document.getElementById('loading').parentNode.removeChild(document.getElementById('loading'));
+					document.getElementById('containerDiv').style = "opacity:1";
+					containerDiv.removeChild(document.getElementById('studentsrn'));
+					containerDiv.removeChild(document.getElementById('studentname'));
+					containerDiv.removeChild(document.getElementById('appDiv'));
+					alert("Attendance Marked Succesfully!");
+					window.location.href = "facultyOptionSelector.html";
+				}
+				else if(xhr.readyState == 4 && xhr.status != 200)
+				{
+					alert('Network Problem! Please retry!');
+					window.location.href = "facultyOptionSelector.html";
+				}
+			}
+		</script>
+	</body>
+</html>
